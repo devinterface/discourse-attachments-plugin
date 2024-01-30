@@ -1,0 +1,179 @@
+<PluginOutlet @name="admin-users-list-show-before" />
+
+<div class="admin-title">
+  <h2>{{this.title}}</h2>
+</div>
+
+<div class="username controls">
+  <TextField
+    @value={{this.listFilter}}
+    @placeholder={{this.searchHint}}
+    @title={{this.searchHint}}
+  />
+</div>
+<LoadMore
+  @selector=".directory-table .directory-table__cell"
+  @action={{action "loadMore"}}
+  class="users-list-container"
+>
+  {{#if this.model}}
+    <ResponsiveTable
+      @className="users-list"
+      @aria-label={{this.title}}
+      @style={{html-safe
+        (concat
+          "grid-template-columns: minmax(min-content, 2fr) repeat("
+          (html-safe this.columnCount)
+          ", minmax(min-content, 1fr))"
+        )
+      }}
+      @updates={{this.model.original_filename}}
+    >
+      <:header>
+        <TableHeaderToggle
+          @field="original_filename"
+          @labelKey="admin.uploads.original_filename"
+          @order={{this.order}}
+          @asc={{this.asc}}
+          @automatic={{true}}
+          class="directory-table__column-header--username"
+        />
+        <TableHeaderToggle
+          @field="source"
+          @labelKey="admin.uploads.source"
+          @order={{this.order}}
+          @asc={{this.asc}}
+          @automatic={{true}}
+        />
+        <TableHeaderToggle
+          @field="weight"
+          @labelKey="admin.uploads.weight"
+          @order={{this.order}}
+          @asc={{this.asc}}
+          @automatic={{true}}
+        />
+        <TableHeaderToggle
+          @field="sizes"
+          @labelKey="admin.uploads.sizes"
+          @order={{this.order}}
+          @asc={{this.asc}}
+          @automatic={{true}}
+        />
+        <TableHeaderToggle
+          @field="created"
+          @labelKey="created"
+          @order={{this.order}}
+          @asc={{this.asc}}
+          @automatic={{true}}
+        />
+        <PluginOutlet
+          @name="admin-users-list-thead-after"
+          @outletArgs={{hash order=this.order asc=this.asc}}
+        />
+
+        <div class="directory-table__column-header">&nbsp;</div>
+
+      </:header>
+
+      <:body>
+        {{#each this.model as |user|}}
+          <div class="user directory-table__row">
+            <div class="directory-table__cell original-filename">
+              <img src="{{user.url}}" class="header avatar"/>
+              <p>
+                {{user.original_filename}}
+              </p>
+            </div>
+
+            <div class="directory-table__cell original-filename">
+              <ul>
+                {{#each user.upload_references as |ur|}}
+                  <li>
+                    {{ur.target_type}} -
+                    {{#if (eq ur.target_type 'Post')}}
+                      <LinkTo
+                        @route="post"
+                        @models={{array ur.target.id}}
+                      >{{ur.target.title}}</LinkTo>
+                    {{/if}}
+                    {{#if (eq ur.target_type 'User')}}
+                      <LinkTo
+                        @route="user"
+                        @models={{array ur.target.title}}
+                      >{{ur.target.title}}</LinkTo>
+                    {{/if}}
+                    {{#if (eq ur.target_type 'UserAvatar')}}
+                      <LinkTo
+                        @route="user"
+                        @models={{array ur.target.title}}
+                      >{{ur.target.title}}</LinkTo>
+                    {{/if}}
+                  </li>
+                {{/each}}
+              </ul>
+            </div>
+
+            <div
+              class="directory-table__cell filesize"
+              title={{user.filesize}}
+            >
+              <span class="directory-table__label">
+                <span>{{i18n "filesize"}}</span>
+              </span>
+              <span class="directory-table__value">
+                {{user.filesize}}
+              </span>
+            </div>
+            <div class="directory-table__cell sizes">
+              <span class="directory-table__label">
+                <span>{{i18n "admin.uploads.sizes"}}</span>
+              </span>
+              <span class="directory-table__value">
+                {{user.width}}x{{user.height}}
+              </span>
+            </div>
+            <div
+              class="directory-table__cell created"
+              title={{raw-date user.created_at}}
+            >
+              <span class="directory-table__label">
+                <span>{{i18n "created"}}</span>
+              </span>
+              <span class="directory-table__value">
+                {{raw-date user.created_at}}
+              </span>
+            </div>
+
+            <PluginOutlet
+              @name="admin-users-list-td-after"
+              @outletArgs={{hash user=user query=this.query}}
+            />
+
+            <div
+              class="directory-table__cell user-role{{if
+                  (or user.admin user.moderator user.second_factor_enabled)
+                  ''
+                  '--empty'
+                }}"
+            >
+              <span class="directory-table__label">
+                <span>{{i18n "admin.users.status"}}</span>
+              </span>
+              <span class="directory-table__value">
+              </span>
+              <PluginOutlet
+                @name="admin-users-list-icon"
+                @connectorTagName="div"
+                @outletArgs={{hash user=user query=this.query}}
+              />
+            </div>
+          </div>
+        {{/each}}
+      </:body>
+    </ResponsiveTable>
+
+    <ConditionalLoadingSpinner @condition={{this.refreshing}} />
+  {{else}}
+    <p>{{i18n "search.no_results"}}</p>
+  {{/if}}
+</LoadMore>
