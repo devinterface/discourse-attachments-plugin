@@ -1,0 +1,11 @@
+it:
+  admin_js:
+    admin:
+      uploads:
+        search_hint: Nome file
+        original_filename: Nome file
+        source: Sorgente
+        weight: Peso
+        sizes: Dimensioni
+      manage_attachments:
+        title: Gestisci allegati

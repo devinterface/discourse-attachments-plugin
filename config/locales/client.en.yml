@@ -1,0 +1,11 @@
+en:
+  admin_js:
+    admin:
+      uploads:
+        search_hint: Filename
+        original_filename: Filename
+        source: Source
+        weight: Weight
+        sizes: Sizes
+      manage_attachments:
+        title: Manage attachments
