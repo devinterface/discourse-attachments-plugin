@@ -10,7 +10,7 @@ class UploadIndexQuery
   attr_reader :params, :trust_levels
 
   SORTABLE_MAPPING = {
-    "created" => "created_at"
+    'created' => 'created_at'
   }
 
   def find_uploads(limit = 100)
@@ -23,39 +23,35 @@ class UploadIndexQuery
     order = []
 
     custom_order = params[:order]
-    custom_direction = params[:asc].present? ? "ASC" : "DESC"
+    custom_direction = params[:asc].present? ? 'ASC' : 'DESC'
     if custom_order.present? &&
-         without_dir = SORTABLE_MAPPING[custom_order.downcase.sub(/ (asc|desc)\z/, "")]
+       without_dir = SORTABLE_MAPPING[custom_order.downcase.sub(/ (asc|desc)\z/, '')]
       order << "#{without_dir} #{custom_direction}"
     end
 
-    order << "uploads.created_at DESC" if !custom_order.present?
+    order << 'uploads.created_at DESC' unless custom_order.present?
 
-    query = klass.includes(upload_references: :target).order(order.reject(&:blank?).join(","))
+    query = klass.includes(upload_references: :target).order(order.reject(&:blank?).join(','))
 
     query = query unless params[:stats].present? && params[:stats] == false
 
-    query = query.joins(:primary_email) if params[:show_emails] == "true"
+    query = query.joins(:primary_email) if params[:show_emails] == 'true'
 
     query
   end
 
   def filter_by_trust
     levels = trust_levels.map { |key, _| key.to_s }
-    if levels.include?(params[:query])
-      @query.where("trust_level = ?", trust_levels[params[:query].to_sym])
-    end
+    @query.where('trust_level = ?', trust_levels[params[:query].to_sym]) if levels.include?(params[:query])
   end
 
   def filter_by_search
     filter = params[:filter]
-    if filter.present?
-      @query.where('uploads.original_filename ILIKE ?', "%#{filter}%")
-    end
+    @query.where('uploads.original_filename ILIKE ?', "%#{filter}%") if filter.present?
   end
 
   def filter_exclude
-    @query.where("uploads.id != ?", params[:exclude]) if params[:exclude].present?
+    @query.where('uploads.id != ?', params[:exclude]) if params[:exclude].present?
   end
 
   # this might not be needed in rails 4 ?
